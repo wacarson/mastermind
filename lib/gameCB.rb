@@ -1,4 +1,4 @@
-class Game
+class GameCB
   attr_reader :code
   def initialize
     @code = make_code
@@ -66,4 +66,9 @@ class Game
     end
     puts "#{count} in the wrong location"
   end
-end #close class
+
+  def to_s
+    @code[0] + " " + @code[1] + " " + @code[2] + " " + @code[3]
+  end
+  
+end

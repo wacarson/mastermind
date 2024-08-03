@@ -1,7 +1,10 @@
+require_relative 'checker'
+
 class GameCB
   attr_reader :code
   def initialize
     @code = make_code
+    @checker = Checker.new()
   end
 
   def make_code
@@ -34,37 +37,8 @@ class GameCB
 
   def check_answer(guess)
      return 'win' if guess.join.upcase == @code.join
-     locations = check_exacts(guess)
-     check_colors(guess, locations)
-  end
-
-  def check_exacts(guess)
-     count = 0
-     locations = []
-     i = 0
-     guess.each do
-       if guess[i].upcase == @code[i]
-         count += 1
-         locations.push(i)
-       end
-       i += 1
-     end
-    puts "#{count} exactly correct"
-    return locations.reverse
-  end
-
-  def check_colors(guesses, exact_locations)
-    temp_code = @code.clone
-    exact_locations.each do | loc |
-      temp_code.delete_at(loc)
-      guesses.delete_at(loc)
-    end
-    
-    count = 0
-    guesses.uniq.each do |guess|
-      count += 1 if temp_code.include?(guess.upcase)
-    end
-    puts "#{count} in the wrong location"
+     locations = @checker.check_exacts(guess, code)
+     @checker.check_colors(guess, locations, code)
   end
 
   def to_s

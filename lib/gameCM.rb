@@ -1,10 +1,12 @@
 require_relative 'checker'
+require_relative 'guess'
 
 class GameCM
   attr_reader :code
   def initialize
     @code = make_code
     @checker = Checker.new()
+    @guess = Guess.new()
   end
 
   def make_code
@@ -43,7 +45,7 @@ class GameCM
       guess = []
       finds = 0
       colors.each {|k, v| finds += v }
-      i = 7 if finds == 4 && i < 7
+      i = 6 if finds == 4 && i < 7
         case i
           when 1 then guess = ["Red", "Red", "Red", "Red"]
           when 2 then guess = ["Orange", "Orange", "Orange", "Orange"]
@@ -52,9 +54,9 @@ class GameCM
           when 5 then guess = ["Blue", "Blue", "Blue", "Blue"]
           when 6
             colors["Purple"] = 4 - finds
-            guess = guess_smart(colors)
+            guess = @guess.guess_smart(colors)
         else
-          guess = guess_smart(colors)
+          guess = @guess.best_guess(colors)
         end
       puts guess[0] + " " + guess[1] + " " + guess[2] + " " + guess[3]
       response = check_answer(guess.map {|color| color[0]})
@@ -66,21 +68,12 @@ class GameCM
     puts "You win! The computer did not crack the code" unless response == 'win'
   end
 
-  def guess_smart(colors)
-    code_colors = []
-    colors.each do |color, value|
-      for i in 1..value
-        code_colors.push(color)
-      end
-    end
-    return code_colors.shuffle
-  end
 
   def check_answer(guess)
      return 'win' if guess.join == @code.join
-     locations = @checker.check_exacts(guess, @code)
-     wrong_locations = @checker.check_colors(guess, locations, @code)
-     return locations.length + wrong_locations
+     @guess.exact_locations = @checker.check_exacts(guess, @code)
+     @guess.wrong_locations = @checker.check_colors(guess, @guess.exact_locations, @code)
+     @guess.total_locations
   end
 
   def to_s
